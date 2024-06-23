@@ -33,7 +33,7 @@ def main(
         smask: path to save the final mask (optional)
         masks: ;-separated mask image paths (optional)
         imasks: ;-separated negative mask image paths (optional)
-        norm: perform mask normalization with level 0-4
+        norm: perform mask normalization with level 0-5
         verbose: print additional output
         fast: save fast but larger files
     """
