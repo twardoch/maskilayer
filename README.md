@@ -22,11 +22,69 @@ pip install maskilayer
 
 ## Usage
 
+### CLI usage
+
 You can use maskilayer from the command line:
 
+```bash
+maskilayer --back background.png --comp overlay.png --out output.png --masks mask1.png;mask2.png --imasks inverted_mask.png --norm 2 --verbose
 ```
-python -m maskilayer --back background.png --comp overlay.png --out output.png --masks mask1.png;mask2.png --imasks inverted_mask.png --norm 2 --verbose
+
+CLI docs
+
+```text
+maskilayer
+INFO: Showing help with the command 'maskilayer -- --help'.
+
+NAME
+    maskilayer - Composite two images using mask(s).
+
+SYNOPSIS
+    maskilayer <flags>
+
+DESCRIPTION
+    Composite two images using mask(s).
+
+FLAGS
+    -b, --back=BACK
+        Type: str
+        Default: ''
+        layer 0 (background image path)
+    -c, --comp=COMP
+        Type: str
+        Default: ''
+        layer 1 (overlay image path that will be composited via masks)
+    -o, --out=OUT
+        Type: str
+        Default: ''
+        output composite image
+    -s, --smask=SMASK
+        Type: str
+        Default: ''
+        path to save the final mask (optional)
+    -m, --masks=MASKS
+        Type: Optional
+        Default: None
+        ;-separated mask image paths (optional)
+    -i, --imasks=IMASKS
+        Type: Optional
+        Default: None
+        ;-separated negative mask image paths (optional)
+    -n, --norm=NORM
+        Type: int
+        Default: 0
+        perform mask normalization with level 0-4
+    -v, --verbose=VERBOSE
+        Type: bool
+        Default: False
+        print additional output
+    -f, --fast=FAST
+        Type: bool
+        Default: False
+        save fast but larger files
 ```
+
+### Code usage
 
 Or import it in your Python code:
 
