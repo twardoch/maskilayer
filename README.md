@@ -2,7 +2,9 @@
 
 ## Python tool to composite two images using multiple mask images
 
-Maskilayer is a simple image compositing tool that allows you to blend two images using multiple mask images. It provides a flexible and efficient way to create complex image compositions using numpy and PIL.
+Maskilayer is a simple image compositing tool that allows you to blend two images using multiple mask images. It provides a flexible and efficient way to create complex image compositions. 
+
+Uses `numpy` and `Pillow`.
 
 ## Features
 
@@ -24,7 +26,7 @@ pip install maskilayer
 
 ### CLI usage
 
-You can use maskilayer from the command line:
+Use `maskilayer` from the command line:
 
 ```bash
 maskilayer --back background.png --comp overlay.png --out output.png --masks mask1.png;mask2.png --imasks inverted_mask.png --norm 2 --verbose
