@@ -145,6 +145,8 @@ async def write_image(image: Image.Image, path: Path, fast: bool = False) -> Non
     else:
         image.save(output, format="PNG", optimize=True)
 
+    path.parent.mkdir(parents=True, exist_ok=True)
+
     output.seek(0)
     async with aiofiles.open(path, "wb") as f:
         await f.write(output.getvalue())
