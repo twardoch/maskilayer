@@ -173,6 +173,7 @@ comp_images(
 ## 4. Mask handling
 
 - If you supply multiple masks, `maskilayer` averages them for the final composition.
+- `maskilayer` always converts the mask images to grayscale.
 - If you supply a normalization level, `maskilayer` will adjust the mask contrast:
   - Level 0 uses masks as-is
   - Level 1 stretches grayscale range to full black-white spectrum
