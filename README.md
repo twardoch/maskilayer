@@ -177,7 +177,7 @@ comp_images(
 - If you supply a normalization level, `maskilayer` will adjust the mask contrast:
   - Level 0 uses masks as-is
   - Level 1 stretches grayscale range to full black-white spectrum
-  - Levels 2-5 progressively increase contrast for more abrupt transitions between bright and dark
+  - Levels 2-5 progressively increase contrast for more abrupt transitions between bright and dark (level values higher than 5 are permitted but not supported)
 
 ### 4.1. Tips for handling multiple mask paths
 
