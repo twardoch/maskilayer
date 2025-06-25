@@ -49,17 +49,19 @@ def main(
         out = Path(out)
     else:
         cli_help()
-    if smask:
-        smask = Path(smask)
-    else:
-        smask = None
+
+    # smask is the string argument from CLI (default "")
+    save_mask_for_comp_images: Path | None = None
+    if smask:  # True if smask is not an empty string
+        save_mask_for_comp_images = Path(smask)
+
     comp_images(
         background=back,
         overlay=comp,
         output=out,
         masks=normalize_paths(masks),
         invert_masks=normalize_paths(imasks),
-        save_mask=Path(smask),
+        save_mask=save_mask_for_comp_images, # Pass the Path object or None
         normalize_level=int(norm),
         verbose=verbose,
         fast=fast,
