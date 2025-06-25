@@ -35,16 +35,25 @@ def log(msg: str, indent: int = 0):
     logger.info(msg, extra={"markup": True})
 
 
+def _load_image_to_array(
+    path: Path, is_mask: bool, description: str, idx: int = 0
+) -> np.ndarray:
+    """Load an image or mask from path into a numpy array."""
+    log(f"Opening {description} {idx}: [blue]{path}[/]", 1)
+    image = Image.open(path)
+    if is_mask:
+        return np.array(image.convert("L")).astype(float) / 255.0
+    return np.array(image)
+
+
 def arr_from_layer(path: Path, idx: int = 0) -> np.ndarray:
     """Load an image from path into a numpy array."""
-    log(f"Opening layer {idx}: [blue]{path}[/]", 1)
-    return np.array(Image.open(path))
+    return _load_image_to_array(path, is_mask=False, description="layer", idx=idx)
 
 
 def arr_from_mask(path: Path, idx: int = 0) -> np.ndarray:
     """Load a mask image into a float numpy array."""
-    log(f"Opening mask {idx}:  [blue]{path}[/]", 1)
-    return np.array(Image.open(path).convert("L")).astype(float) / 255.0
+    return _load_image_to_array(path, is_mask=True, description="mask", idx=idx)
 
 
 def normalize_mask_arr(mask: np.ndarray, level: float, idx: int = 0) -> np.ndarray:
@@ -63,33 +72,65 @@ def normalize_mask_arr(mask: np.ndarray, level: float, idx: int = 0) -> np.ndarr
 
     log(f"Normalizing mask {idx} level [blue]{level}[/]", 1)
 
-    # Normalize min to 0, max to 1
-    mask_min, mask_max = mask.min(), mask.max()
-    log(f"Mask {idx} found range: [blue]{mask_min:.2f} - {mask_max:.2f}[/]", 2)
+    mask_min_orig, mask_max_orig = mask.min(), mask.max()
+    log(f"Mask {idx} original range: [blue]{mask_min_orig:.2f} - {mask_max_orig:.2f}[/]", 2)
 
-    mask = (mask - mask_min) / (mask_max - mask_min)
+    # Initial normalization to 0-1 range
+    if (mask_max_orig - mask_min_orig) > np.finfo(float).eps:
+        mask = (mask - mask_min_orig) / (mask_max_orig - mask_min_orig)
+    else:
+        # If flat, (mask - mask_min_orig) results in all zeros.
+        # This is a safe state for a flat mask after this conceptual step.
+        mask = np.zeros_like(mask)
 
     if level == 1:
         return mask
 
     # Truncate by luminance cutoff
-    cutoff = 0.5 - 0.25 * np.exp(-(level - 2) * 0.5)
-    log(f"Mask {idx} luminance: [blue]{cutoff:.2f}[/]", 2)
+    # Cutoff approaches 0.5 from below as level increases.
+    # For level=2, cutoff = 0.5 - 0.25*exp(0) = 0.25
+    # For level=3, cutoff = 0.5 - 0.25*exp(-0.5) approx 0.5 - 0.25*0.606 = 0.348
+    # For level=inf, cutoff approaches 0.5
+    cutoff = 0.5 - 0.25 * np.exp(-(level - 2.0) * 0.5)
+    log(f"Mask {idx} luminance cutoff: [blue]{cutoff:.2f}[/]", 2)
 
-    mask = np.clip(mask, cutoff, 1 - cutoff)
-    mask = (mask - cutoff) / (1 - 2 * cutoff)
+    mask = np.clip(mask, cutoff, 1.0 - cutoff)
+
+    # Re-scale after clip: [cutoff, 1-cutoff] -> [0,1]
+    denominator_cutoff = 1.0 - 2.0 * cutoff
+    if abs(denominator_cutoff) > np.finfo(float).eps:
+        mask = (mask - cutoff) / denominator_cutoff
+    else:
+        # This implies cutoff is 0.5 (or very close).
+        # The mask was clipped to [0.5, 0.5], so it's flat at 0.5.
+        # (mask - 0.5) would be all zeros. Division by zero.
+        # So, the mask is effectively flat at 0.5 after clipping.
+        mask.fill(0.5)
 
     # Apply gamma correction
-    gamma = 1.0 - 0.75 * (1 - np.exp(-(level - 1) * 2.0))
+    # Gamma approaches 0.25 from above as level increases (for level >=1)
+    # For level=1, gamma = 1.0 - 0.75*(1-exp(0)) = 1.0
+    # For level=2, gamma = 1.0 - 0.75*(1-exp(-2)) approx 1.0 - 0.75*(1-0.135) = 1.0 - 0.75*0.865 = 0.351
+    # For level=inf, gamma approaches 0.25
+    gamma = 1.0 - 0.75 * (1.0 - np.exp(-(level - 1.0) * 2.0))
     log(f"Mask {idx} gamma: [blue]{gamma:.2f}[/]", 2)
-
     mask = np.power(mask, gamma)
 
-    # Normalize again
-    mask_min, mask_max = mask.min(), mask.max()
-    log(f"Mask {idx} final range: [blue]{mask_min:.2f} - {mask_max:.2f}[/]", 2)
+    # Final normalization to 0-1 range
+    mask_min_final, mask_max_final = mask.min(), mask.max()
+    log(f"Mask {idx} final range before re-stretch: [blue]{mask_min_final:.2f} - {mask_max_final:.2f}[/]", 2)
 
-    mask = (mask - mask_min) / (mask_max - mask_min)
+    if (mask_max_final - mask_min_final) > np.finfo(float).eps:
+        mask = (mask - mask_min_final) / (mask_max_final - mask_min_final)
+    else:
+        # If flat at this stage, (mask - mask_min_final) makes it all zeros.
+        # This is a consistent state for a flat mask.
+        # Example: if mask became all 0.5, then min_final=0.5, (mask-0.5)=0.
+        # If the goal is to preserve the flat value (e.g. 0.5), then use mask.fill(mask_min_final)
+        # However, making it 0 is consistent with (X-min)/(max-min) when max-min=0 and X=min.
+        # Let's choose to preserve the value if it's flat here.
+        mask.fill(mask_min_final)
+
 
     return mask
 
