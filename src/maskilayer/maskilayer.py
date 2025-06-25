@@ -6,8 +6,8 @@ Image compositing tool using numpy and PIL.
 import asyncio
 import io
 import logging
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 import aiofiles
 import numpy as np
