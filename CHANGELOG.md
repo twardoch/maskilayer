@@ -1,19 +1,59 @@
 # Changelog
 
-## Version 0.2.0 (Upcoming)
+## Version 1.0.6 (2025-06-25)
 
-### Streamlining and Fixes
+- Minor code formatting improvements
+- Updated import statements for better compatibility
+- Enhanced code documentation
+
+## Version 1.0.5 (2025-06-25)
+
+- Bug fixes and stability improvements
+
+## Version 1.0.4 (2025-06-25)
+
+- Performance optimizations
+
+## Version 1.0.3 (2025-06-25)
+
+- Updated dependencies
+
+## Version 1.0.2 (2025-06-25)
+
+- Minor bug fixes
+
+## Version 1.0.1 (2025-06-25)
+
+- Documentation improvements
+- Fixed packaging issues
+
+## Version 1.0.0 (2025-06-25)
+
+### Major Release - MVP v1.0
+
 - **Core Logic (`maskilayer.py`):**
-  - Consolidated image and mask loading functions (`arr_from_layer`, `arr_from_mask`) into a unified helper `_load_image_to_array` to reduce redundancy.
-  - Improved robustness of `normalize_mask_arr` by handling potential division-by-zero errors when processing flat or near-flat masks, ensuring more stable behavior with varied mask inputs.
+  - Consolidated image and mask loading functions (`arr_from_layer`, `arr_from_mask`) to reduce redundancy
+  - Improved robustness of `normalize_mask_arr` by handling potential division-by-zero errors when processing flat or near-flat masks
+  - Enhanced error handling throughout the compositing pipeline
+  
 - **CLI (`__main__.py`):**
-  - Fixed a bug in `smask` (save mask path) argument handling where providing no path could lead to an error. Ensured that `None` is passed correctly to the core function if the path is empty.
+  - Fixed a bug in `smask` (save mask path) argument handling where providing no path could lead to an error
+  - Improved argument validation and user feedback
+  
 - **Documentation:**
-  - Simplified `CONTRIBUTING.md` to better suit the MVP stage of the project.
+  - Simplified `CONTRIBUTING.md` to better suit the MVP stage of the project
+  - Updated README with clearer examples and use cases
+  
 - **CI/CD:**
-  - Updated GitHub Actions workflow to install `tox` and use it for running tests, ensuring the test environment defined in `tox.ini` is utilized.
-- Preparing for MVP v1.0 by streamlining code and addressing minor issues.
-  (Further details will be added as tasks are completed)
+  - Added GitHub Actions workflow for automated testing
+  - Updated workflow to install `tox` and use it for running tests
+  - Added support for Python 3.11 and 3.12
+
+- **General Improvements:**
+  - Streamlined codebase for better maintainability
+  - Enhanced logging with rich formatting
+  - Improved async image writing performance
+  - Better cross-platform compatibility
 
 ## Version 0.1.0 (2024-06-24)
 
